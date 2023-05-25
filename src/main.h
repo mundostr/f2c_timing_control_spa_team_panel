@@ -21,7 +21,9 @@ void init_pins() {
 
 void init_radio() {
     if (!radio.begin()) {
+        #ifdef DEBUG
         Serial.println(F("NRF24: ERROR"));
+        #endif
         // blink_info_led();
     }
 
@@ -30,9 +32,11 @@ void init_radio() {
     radio.setChannel(NRF_CHANNEL);
     radio.setPayloadSize(sizeof(payload));
     radio.openReadingPipe(0, RADIO_ADDRESS);
-    radio.startListening(); // Modo RX
+    radio.startListening(); // Modo RX / RX Mode
     
-    Serial.println(F("NRF24: OK modo RX"));
+    #ifdef DEBUG
+    Serial.println(F("NRF24: OK modo RX / RX mode OK"));
+    #endif
 }
 
 void loop_radio() {
@@ -44,7 +48,10 @@ void loop_radio() {
 
         char outputBuf[50];
         sprintf(outputBuf, "Contador: %d, ID: %s, comando: %s", receivedCount, payload.id, payload.data);
+        
+        #ifdef DEBUG
         Serial.println(outputBuf);
+        #endif
 
         // verify_payload_data(payload.data);
     }
