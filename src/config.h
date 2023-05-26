@@ -1,6 +1,7 @@
 /*
 https://lastminuteengineers.com/nrf24l01-arduino-wireless-communication/
 https://circuitdigest.com/microcontroller-projects/bluetooth-controlled-arduino-scoreboard-using-p10-led-matrix-display
+https://forum.arduino.cc/t/need-numeric-or-another-font-for-a-clock-in-dmd2-library/492186/4
 */
 
 #pragma once
