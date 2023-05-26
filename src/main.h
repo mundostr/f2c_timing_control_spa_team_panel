@@ -5,6 +5,15 @@
 void init_pins() {
     // pinMode(INFO_LED_PIN, OUTPUT);
     // digitalWrite(INFO_LED_PIN, LOW);
+
+    laps_pulse.attach(LAP_COUNTER_INTERRUPT_PIN, INPUT);
+}
+
+void init_led_matrix() {
+    led_matrix.setBrightness(128);
+    led_matrix.selectFont(Arial_Regular_24);
+    led_matrix.begin();
+    laps_box.print(100); // Primer test de caracteres / First characters test
 }
 
 // void blink_info_led() {
@@ -54,5 +63,17 @@ void loop_radio() {
         #endif
 
         // verify_payload_data(payload.data);
+    }
+}
+
+void loop_laps_pulse() {
+    laps_pulse.update();
+
+    if (laps_pulse.rose()) {
+        laps_counter++;
+        
+        #ifdef DEBUG
+        Serial.println(laps_counter);
+        #endif
     }
 }

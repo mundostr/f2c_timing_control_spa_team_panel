@@ -11,6 +11,7 @@ void setup() {
     Serial.begin(SERIAL_MONITOR_BAUDS);
     init_pins();
     init_radio();
+    init_led_matrix();
 
     #ifdef DEBUG
     Serial.println("CAJA PANEL EQUIPO INICIALIZADA / TEAM PANEL BOX STARTED");
@@ -19,4 +20,5 @@ void setup() {
 
 void loop() {
     loop_radio();
+    loop_laps_pulse();
 }
