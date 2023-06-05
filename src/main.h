@@ -2,41 +2,151 @@
 
 #include "config.h"
 
-void init_pins() {
-    // pinMode(INFO_LED_PIN, OUTPUT);
-    // digitalWrite(INFO_LED_PIN, LOW);
+void rtc_interrupt_check() {
+    interruptCount++;
 
+    if (interruptCount % 3276 == 0) {
+        ts++;
+        update_display = true;
+    }
+    
+    if (interruptCount == 32768) {
+        ss++;
+        ts = -1;
+        interruptCount = 0;
+
+        if (ss > 59) { ss = 0; mm++; }
+        if (mm > 9) { mm = 0; }
+    }
+}
+
+void update_fault_lights() {
+    static const int start_x_coord = 0;
+    static const int end_x_coord = 127;
+    int limit_x_coord;
+    bool show_faults = true;
+
+    switch (faults_counter) {
+        case 0: {
+            show_faults = false;
+            break;
+        }
+
+        case 1: {
+            limit_x_coord = 31;
+            break;
+        }
+
+        case 2: {
+            limit_x_coord = 63;
+            break;
+        }
+
+        case 3: {
+            limit_x_coord = 95;
+            break;
+        }
+
+        case 4: {
+            limit_x_coord = 127;
+            break;
+        }
+
+        default: {}
+    }
+
+    // Limpieza fila inferior matriz (infracciones) / Cleanup of matrix bottom row (warnings)
+    led_matrix.drawFilledBox(start_x_coord, 33, end_x_coord, 47, GRAPHICS_INVERSE);
+    if (show_faults) { led_matrix.drawFilledBox(start_x_coord, 33, limit_x_coord, 47, GRAPHICS_NORMAL); }
+}
+
+void update_laps_in_display() {
+    static char laps_string[4];
+    
+    snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);    
+    for (int y = 2; y < 30; y++) { led_matrix.drawLine(2, y, 43, y, GRAPHICS_INVERSE); }
+    led_matrix.drawString(5, 5, laps_string, sizeof(laps_string), GRAPHICS_NORMAL);
+    // CALCULAR POSICIONES Y ACTUALIZAR CARACTER POR CARACTER
+}
+
+void verify_payload_data(char *data) {
+    unsigned int command = 99;
+
+    for (unsigned int c = 0; c < sizeof(COMMANDS_ARRAY) / sizeof(COMMANDS_ARRAY[0]); c++) {
+        if (strcmp(data, COMMANDS_ARRAY[c]) == 0) { command = c; }
+    }
+
+    switch (command) {
+        // RFP
+        case 0: {
+            faults_counter < 4 ? faults_counter++ : faults_counter = 4;
+            update_fault_lights();
+            break;
+        }
+        
+        // RFM
+        case 1: {
+            faults_counter > 0 ? faults_counter-- : faults_counter = 0;
+            update_fault_lights();
+            break;
+        }
+
+        // SRS
+        case 2: {
+            race_started = true;
+            mm = 0, ss = 0, ts = 0, interruptCount = 0;
+            attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_interrupt_check, FALLING);
+            break;
+        }
+
+        // RRS
+        case 3: {
+            race_started = false;
+            update_display = true;
+            mm = 0; ss = 0; ts = 0;
+            detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
+            break;
+        }
+
+        // SES (pendiente)
+        case 4: {
+            break;
+        }
+
+        // 100
+        case 5: {
+            laps_limit = 100;
+            break;
+        }
+
+        // 200
+        case 6: {
+            laps_limit = 200;
+            break;
+        }
+        
+        default: {}
+    }
+    
+    #ifdef DEBUG
+    Serial.println(COMMANDS_ARRAY[command]);
+    #endif
+}
+
+
+void init_pins() {
     laps_pulse.attach(LAP_COUNTER_INTERRUPT_PIN, INPUT);
 }
-
-void init_led_matrix() {
-    led_matrix.setBrightness(128);
-    led_matrix.selectFont(Arial_Regular_24);
-    led_matrix.begin();
-    laps_box.print(100); // Primer test de caracteres / First characters test
-}
-
-// void blink_info_led() {
-//     for(;;) {
-//         digitalWrite(INFO_LED_PIN, !digitalRead(INFO_LED_PIN));
-//         delay(250);
-//     }
-// }
-
-// void verify_payload_data(char *data) {
-//    if (strcmp(data, "100") == 0) Serial.println("Configurado a 100 vueltas");
-//    if (strcmp(data, "200") == 0) Serial.println("Configurado a 200 vueltas");
-// }
 
 void init_radio() {
     if (!radio.begin()) {
         #ifdef DEBUG
         Serial.println(F("NRF24: ERROR"));
         #endif
-        // blink_info_led();
+        for(;;);
     }
 
-    radio.setPALevel(RF24_PA_MAX); //(RF24_PA_MIN|RF24_PA_LOW|RF24_PA_HIGH|RF24_PA_MAX)
+    radio.setPALevel(RF24_PA_MAX);   //(RF24_PA_MIN|RF24_PA_LOW|RF24_PA_HIGH|RF24_PA_MAX)
     radio.setDataRate(RF24_250KBPS); //(RF24_250KBPS|RF24_1MBPS|RF24_2MBPS)
     radio.setChannel(NRF_CHANNEL);
     radio.setPayloadSize(sizeof(payload));
@@ -48,22 +158,72 @@ void init_radio() {
     #endif
 }
 
+void init_led_matrix() {
+    led_matrix.clearScreen(true);
+    led_matrix.selectFont(Droid_Sans_24);
+
+    led_matrix.drawString(5, 5, "000", 3, GRAPHICS_NORMAL);
+    led_matrix.drawString(60, 5, "0:00.0", 6, GRAPHICS_NORMAL);
+
+    led_matrix.drawBox(0, 0, 127, 31, GRAPHICS_NORMAL);
+    led_matrix.drawBox(1, 1, 126, 30, GRAPHICS_NORMAL);
+    
+    led_matrix.drawLine(44, 0, 44, 31, GRAPHICS_NORMAL);
+    led_matrix.drawLine(45, 0, 45, 31, GRAPHICS_NORMAL);
+}
+
+void init_rtc() {
+    Wire.begin();
+    if (!rtc.begin()) {
+        #ifdef DEBUG
+        Serial.flush();
+        Serial.println(F("RTC: ERROR"));
+        #endif
+        for(;;);
+    }
+    // rtc.writeSqwPinMode(DS3231_SquareWave8kHz);
+    rtc.enable32K();
+    
+    pinMode(RTC_EXT_INT_PIN, INPUT_PULLUP);
+
+    #ifdef DEBUG
+    Serial.println(F("RTC: OK 32K output enabled"));
+    #endif
+}
+
+
 void loop_radio() {
     static int receivedCount = 0;
-    
+
     if (radio.available() > 0) {
         radio.read(&payload, sizeof(payload));
         receivedCount++;
+        verify_payload_data(payload.data);
 
-        char outputBuf[50];
-        sprintf(outputBuf, "Contador: %d, ID: %s, comando: %s", receivedCount, payload.id, payload.data);
-        
         #ifdef DEBUG
+        char outputBuf[50];
+        snprintf(outputBuf, sizeof(outputBuf), "Contador: %d, ID: %s, comando: %s", receivedCount, payload.id, payload.data);
         Serial.println(outputBuf);
         #endif
-
-        // verify_payload_data(payload.data);
     }
+}
+
+void loop_matrix() {
+    static char display_buffer[7];
+    
+    if (update_display) {
+        snprintf(display_buffer, sizeof(display_buffer), "%d:%02d.%d", mm, ss, ts);
+        for (int y = 2; y < 30; y++) { led_matrix.drawLine(46, y, 125, y, GRAPHICS_INVERSE); }
+        led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
+
+        update_display = false;
+        
+        #ifdef DEBUG
+        Serial.println(display_buffer);
+        #endif
+    }
+
+    led_matrix.scanDisplayBySPI();
 }
 
 void loop_laps_pulse() {
@@ -71,9 +231,11 @@ void loop_laps_pulse() {
 
     if (laps_pulse.rose()) {
         laps_counter++;
+        update_laps_in_display();
         
-        #ifdef DEBUG
-        Serial.println(laps_counter);
-        #endif
+        if (laps_counter == laps_limit) {
+            race_started = false;
+            detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
+        }
     }
 }
