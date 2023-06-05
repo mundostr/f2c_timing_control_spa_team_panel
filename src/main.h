@@ -75,10 +75,10 @@ void update_fault_lights() {
 
 void update_two_digits(byte counter, char *laps_str) {
     if (counter % 10 == 0) {
-        led_matrix.drawChar(5, 17, laps_str[1], GRAPHICS_NORMAL);
-        led_matrix.drawChar(5, 29, '0', GRAPHICS_NORMAL);
+        led_matrix.drawChar(17, 5, laps_str[1], GRAPHICS_NORMAL);
+        led_matrix.drawChar(29, 5, '0', GRAPHICS_NORMAL);
     } else {
-        led_matrix.drawChar(5, 29, laps_str[2], GRAPHICS_NORMAL);
+        led_matrix.drawChar(29, 5, laps_str[2], GRAPHICS_NORMAL);
     }
 }
 
@@ -88,14 +88,14 @@ void update_laps_in_display() {
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
 
     if (getDigits(laps_counter) == 1) {
-        led_matrix.drawChar(5, 29, laps_string[2], GRAPHICS_NORMAL);
+        led_matrix.drawChar(5, 5, laps_string[2], GRAPHICS_NORMAL);
     } else if (getDigits(laps_counter) == 2) {
         update_two_digits(laps_counter, laps_string);
     } else {
         if (laps_counter % 100 == 0) {
             led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
-            led_matrix.drawChar(5, 17, '0', GRAPHICS_NORMAL);
-            led_matrix.drawChar(5, 29, '0', GRAPHICS_NORMAL);
+            led_matrix.drawChar(17, 5, '0', GRAPHICS_NORMAL);
+            led_matrix.drawChar(29, 5, '0', GRAPHICS_NORMAL);
         } else {
             update_two_digits(laps_counter, laps_string);
         }
