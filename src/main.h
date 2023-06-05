@@ -2,6 +2,19 @@
 
 #include "config.h"
 
+byte getDigits(byte number) {
+    int digits = 0;
+    
+    if (number == 0) return 1;
+    
+    while (number != 0) {
+        number /= 10;
+        digits++;
+    }
+    
+    return digits;
+}
+
 void rtc_interrupt_check() {
     interruptCount++;
 
@@ -60,17 +73,43 @@ void update_fault_lights() {
     if (show_faults) { led_matrix.drawFilledBox(start_x_coord, 33, limit_x_coord, 47, GRAPHICS_NORMAL); }
 }
 
-void update_laps_in_display() {
-    /* static char laps_string[4];
-    
-    snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);    
-    for (int y = 2; y < 30; y++) { led_matrix.drawLine(2, y, 43, y, GRAPHICS_INVERSE); }
-    led_matrix.drawString(5, 5, laps_string, sizeof(laps_string), GRAPHICS_NORMAL); */
+void update_two_digits(byte counter, char *laps_str) {
+    if (counter % 10 == 0) {
+        led_matrix.drawChar(5, 17, laps_str[1], GRAPHICS_NORMAL);
+        led_matrix.drawChar(5, 29, '0', GRAPHICS_NORMAL);
+        
+        Serial.println(laps_str[1]);
+        Serial.println('0');
+    } else {
+        led_matrix.drawChar(5, 29, laps_str[2], GRAPHICS_NORMAL);
 
+        Serial.println(laps_str[2]);
+    }
+}
+
+void update_laps_in_display() {
     // Refresco alternativo caracter por caracter
-    if (laps_counter < 10) {
-        led_matrix.drawChar(5, 5, '0', GRAPHICS_NORMAL);
-        led_matrix.drawChar(5, 5, '0', GRAPHICS_NORMAL);
+    static char laps_string[4];
+    snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
+
+    if (getDigits(laps_counter) == 1) {
+        led_matrix.drawChar(5, 29, laps_string[2], GRAPHICS_NORMAL);
+
+        Serial.println(laps_string[2]);
+    } else if (getDigits(laps_counter) == 2) {
+        update_two_digits(laps_counter, laps_string);
+    } else {
+        if (laps_counter % 100 == 0) {
+            led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
+            led_matrix.drawChar(5, 17, '0', GRAPHICS_NORMAL);
+            led_matrix.drawChar(5, 29, '0', GRAPHICS_NORMAL);
+
+            Serial.println(laps_string[0]);
+            Serial.println('0');
+            Serial.println('0');
+        } else {
+            update_two_digits(laps_counter, laps_string);
+        }
     }
 }
 
