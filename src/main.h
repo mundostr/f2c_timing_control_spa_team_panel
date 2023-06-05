@@ -66,7 +66,6 @@ void update_laps_in_display() {
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);    
     for (int y = 2; y < 30; y++) { led_matrix.drawLine(2, y, 43, y, GRAPHICS_INVERSE); }
     led_matrix.drawString(5, 5, laps_string, sizeof(laps_string), GRAPHICS_NORMAL);
-    // CALCULAR POSICIONES Y ACTUALIZAR CARACTER POR CARACTER
 }
 
 void verify_payload_data(char *data) {
