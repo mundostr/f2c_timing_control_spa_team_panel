@@ -61,11 +61,17 @@ void update_fault_lights() {
 }
 
 void update_laps_in_display() {
-    static char laps_string[4];
+    /* static char laps_string[4];
     
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);    
     for (int y = 2; y < 30; y++) { led_matrix.drawLine(2, y, 43, y, GRAPHICS_INVERSE); }
-    led_matrix.drawString(5, 5, laps_string, sizeof(laps_string), GRAPHICS_NORMAL);
+    led_matrix.drawString(5, 5, laps_string, sizeof(laps_string), GRAPHICS_NORMAL); */
+
+    // Refresco alternativo caracter por caracter
+    if (laps_counter < 10) {
+        led_matrix.drawChar(5, 5, '0', GRAPHICS_NORMAL);
+        led_matrix.drawChar(5, 5, '0', GRAPHICS_NORMAL);
+    }
 }
 
 void verify_payload_data(char *data) {
