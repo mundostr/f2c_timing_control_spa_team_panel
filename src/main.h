@@ -77,13 +77,8 @@ void update_two_digits(byte counter, char *laps_str) {
     if (counter % 10 == 0) {
         led_matrix.drawChar(5, 17, laps_str[1], GRAPHICS_NORMAL);
         led_matrix.drawChar(5, 29, '0', GRAPHICS_NORMAL);
-        
-        Serial.println(laps_str[1]);
-        Serial.println('0');
     } else {
         led_matrix.drawChar(5, 29, laps_str[2], GRAPHICS_NORMAL);
-
-        Serial.println(laps_str[2]);
     }
 }
 
@@ -94,8 +89,6 @@ void update_laps_in_display() {
 
     if (getDigits(laps_counter) == 1) {
         led_matrix.drawChar(5, 29, laps_string[2], GRAPHICS_NORMAL);
-
-        Serial.println(laps_string[2]);
     } else if (getDigits(laps_counter) == 2) {
         update_two_digits(laps_counter, laps_string);
     } else {
@@ -103,10 +96,6 @@ void update_laps_in_display() {
             led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
             led_matrix.drawChar(5, 17, '0', GRAPHICS_NORMAL);
             led_matrix.drawChar(5, 29, '0', GRAPHICS_NORMAL);
-
-            Serial.println(laps_string[0]);
-            Serial.println('0');
-            Serial.println('0');
         } else {
             update_two_digits(laps_counter, laps_string);
         }
