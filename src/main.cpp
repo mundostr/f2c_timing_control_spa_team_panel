@@ -13,22 +13,17 @@ void setup() {
     #endif
 
     init_pins();
-    // init_radio();
+    init_radio();
     init_led_matrix();
     init_rtc();
 
     #ifdef DEBUG
     Serial.println(F("CAJA PANEL EQUIPO INICIALIZADA / TEAM PANEL BOX STARTED"));
     #endif
-
-    delay(3000);
-    race_started = true;
-    update_display = true;
-    attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_interrupt_check, FALLING);
 }
 
 void loop() {
-    // loop_radio();
+    loop_radio();
     loop_matrix();
     loop_laps_pulse();
 }
