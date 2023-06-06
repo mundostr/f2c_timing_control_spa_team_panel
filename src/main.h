@@ -258,6 +258,7 @@ void loop_radio() {
 
 void loop_matrix() {
     static char display_buffer[7];
+    static unsigned long timerDisplay = 0;
 
     if (update_display) {
         snprintf(display_buffer, sizeof(display_buffer), "%d:%02d.%d", mm, ss, ts);
@@ -272,7 +273,10 @@ void loop_matrix() {
         #endif
     }
 
-    led_matrix.scanDisplayBySPI();
+    if (millis() - timerDisplay >= 1) {
+        led_matrix.scanDisplayBySPI();
+        timerDisplay = millis();
+    }
 }
 
 void loop_laps_pulse() {
