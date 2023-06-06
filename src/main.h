@@ -204,8 +204,8 @@ void init_led_matrix() {
     led_matrix.drawBox(0, 0, 127, 31, GRAPHICS_NORMAL);
     led_matrix.drawBox(1, 1, 126, 30, GRAPHICS_NORMAL);
     
-    led_matrix.drawLine(44, 0, 44, 31, GRAPHICS_NORMAL);
     led_matrix.drawLine(45, 0, 45, 31, GRAPHICS_NORMAL);
+    led_matrix.drawLine(46, 0, 46, 31, GRAPHICS_NORMAL);
 }
 
 void init_rtc() {
