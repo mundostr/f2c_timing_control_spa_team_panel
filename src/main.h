@@ -152,6 +152,7 @@ void verify_payload_data(char *data) {
             update_display = true;
             laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0;
             detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
+            update_laps_in_display();
             break;
         }
 
