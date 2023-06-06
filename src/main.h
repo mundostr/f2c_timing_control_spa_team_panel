@@ -60,7 +60,7 @@ void update_fault_lights() {
     if (show_faults) { led_matrix.drawFilledBox(start_x_coord, 33, limit_x_coord, 47, GRAPHICS_NORMAL); }
 }
 
-byte getDigits(byte number) {
+/* byte getDigits(byte number) {
     int digits = 0;
     
     if (number == 0) return 1;
@@ -71,9 +71,9 @@ byte getDigits(byte number) {
     }
     
     return digits;
-}
+} */
 
-void update_two_digits(byte counter, char *laps_str) {
+/* void update_two_digits(byte counter, char *laps_str) {
     if (counter % 10 == 0) {
         led_matrix.drawFilledBox(18, 5, 44, 29, GRAPHICS_INVERSE);
         led_matrix.drawChar(18, 5, laps_str[1], GRAPHICS_NORMAL);
@@ -82,9 +82,9 @@ void update_two_digits(byte counter, char *laps_str) {
         led_matrix.drawFilledBox(31, 5, 44, 29, GRAPHICS_INVERSE);
         led_matrix.drawChar(31, 5, laps_str[2], GRAPHICS_NORMAL);
     }
-}
+} */
 
-void update_laps_in_display() {
+/* void update_laps_in_display_alt() {
     static char laps_string[4];
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
 
@@ -103,6 +103,15 @@ void update_laps_in_display() {
             update_two_digits(laps_counter, laps_string);
         }
     }
+} */
+
+void update_laps_in_display() {
+    static char laps_string[4];
+    snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
+    led_matrix.drawFilledBox(5, 5, 44, 29, GRAPHICS_INVERSE);
+    led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
+    led_matrix.drawChar(18, 5, laps_string[1], GRAPHICS_NORMAL);
+    led_matrix.drawChar(31, 5, laps_string[2], GRAPHICS_NORMAL);
 }
 
 void verify_payload_data(char *data) {
