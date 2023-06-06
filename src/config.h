@@ -25,7 +25,7 @@ https://lastminuteengineers.com/ds3231-rtc-arduino-tutorial/#:~:text=The%20INT%2
 #define RTC_EXT_INT_PIN 3
 
 // Constantes generales / general constants
-#define DEBUG // Si se define se habilita la consola serial / If defined, serial console is enabled
+// #define DEBUG // Si se define se habilita la consola serial / If defined, serial console is enabled
 #define SERIAL_MONITOR_BAUDS 115200
 #define RADIO_COMMAND_LENGTH 3
 #define NRF_CHANNEL 108
