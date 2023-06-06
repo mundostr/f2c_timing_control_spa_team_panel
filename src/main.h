@@ -2,19 +2,6 @@
 
 #include "config.h"
 
-byte getDigits(byte number) {
-    int digits = 0;
-    
-    if (number == 0) return 1;
-    
-    while (number != 0) {
-        number /= 10;
-        digits++;
-    }
-    
-    return digits;
-}
-
 void rtc_interrupt_check() {
     interruptCount++;
 
@@ -73,6 +60,19 @@ void update_fault_lights() {
     if (show_faults) { led_matrix.drawFilledBox(start_x_coord, 33, limit_x_coord, 47, GRAPHICS_NORMAL); }
 }
 
+byte getDigits(byte number) {
+    int digits = 0;
+    
+    if (number == 0) return 1;
+    
+    while (number != 0) {
+        number /= 10;
+        digits++;
+    }
+    
+    return digits;
+}
+
 void update_two_digits(byte counter, char *laps_str) {
     if (counter % 10 == 0) {
         led_matrix.drawChar(18, 5, laps_str[1], GRAPHICS_NORMAL);
@@ -83,7 +83,6 @@ void update_two_digits(byte counter, char *laps_str) {
 }
 
 void update_laps_in_display() {
-    // Refresco alternativo caracter por caracter
     static char laps_string[4];
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
 
