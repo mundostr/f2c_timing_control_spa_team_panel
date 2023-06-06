@@ -108,6 +108,7 @@ void update_fault_lights() {
 void update_laps_in_display() {
     static char laps_string[4];
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
+    // for (int y = 5; y < 30; y++) { led_matrix.drawLine(5, y, 44, y, GRAPHICS_INVERSE); }
     led_matrix.drawFilledBox(5, 5, 44, 29, GRAPHICS_INVERSE);
     led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
     led_matrix.drawChar(18, 5, laps_string[1], GRAPHICS_NORMAL);
@@ -139,7 +140,8 @@ void verify_payload_data(char *data) {
         // SRS
         case 2: {
             race_started = true;
-            mm = 0, ss = 0, ts = 0, interruptCount = 0;
+            update_display = true;
+            laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0;
             attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_interrupt_check, FALLING);
             break;
         }
@@ -148,7 +150,7 @@ void verify_payload_data(char *data) {
         case 3: {
             race_started = false;
             update_display = true;
-            mm = 0; ss = 0; ts = 0;
+            laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0;
             detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
             break;
         }
@@ -255,14 +257,15 @@ void loop_radio() {
 
 void loop_matrix() {
     static char display_buffer[7];
-    
+
     if (update_display) {
         snprintf(display_buffer, sizeof(display_buffer), "%d:%02d.%d", mm, ss, ts);
-        for (int y = 2; y < 30; y++) { led_matrix.drawLine(46, y, 125, y, GRAPHICS_INVERSE); }
+        // for (int y = 5; y < 30; y++) { led_matrix.drawLine(47, y, 125, y, GRAPHICS_INVERSE); }
+        led_matrix.drawFilledBox(47, 5, 125, 29, GRAPHICS_INVERSE);
         led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
 
         update_display = false;
-        
+            
         #ifdef DEBUG
         Serial.println(display_buffer);
         #endif
