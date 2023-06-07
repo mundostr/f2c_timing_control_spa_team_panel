@@ -4,6 +4,7 @@ https://circuitdigest.com/microcontroller-projects/bluetooth-controlled-arduino-
 https://forum.arduino.cc/t/need-numeric-or-another-font-for-a-clock-in-dmd2-library/492186/4
 https://lygte-info.dk/project/PrecisionTime%20UK.html
 https://lastminuteengineers.com/ds3231-rtc-arduino-tutorial/#:~:text=The%20INT%2FSQW%20pin%20on,clock%20on%20the%2032K%20pin.
+https://forum.arduino.cc/t/p10-with-nrf24l01/570541/10
 */
 
 #pragma once
