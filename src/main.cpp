@@ -8,8 +8,8 @@
 #include "main.h"
 
 void setup() {
-    Serial.begin(SERIAL_MONITOR_BAUDS);
     #ifdef DEBUG
+    Serial.begin(SERIAL_MONITOR_BAUDS);
     #endif
 
     init_pins();
