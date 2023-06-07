@@ -32,7 +32,7 @@
 --------------------------------------------------------------------------------------*/
 DMD::DMD(byte panelsWide, byte panelsHigh)
 {
-    uint16_t ui;
+    // uint16_t ui;
     DisplaysWide=panelsWide;
     DisplaysHigh=panelsHigh;
     DisplaysTotal=DisplaysWide*DisplaysHigh;
@@ -528,7 +528,7 @@ int DMD::charWidth(const unsigned char letter)
     uint8_t firstChar = pgm_read_byte(this->Font + FONT_FIRST_CHAR);
     uint8_t charCount = pgm_read_byte(this->Font + FONT_CHAR_COUNT);
 
-    uint16_t index = 0;
+    // uint16_t index = 0;
 
     if (c < firstChar || c >= (firstChar + charCount)) {
 	    return 0;
