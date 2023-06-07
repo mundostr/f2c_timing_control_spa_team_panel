@@ -13,7 +13,7 @@ void setup() {
     #endif
 
     init_pins();
-    init_radio();
+    // init_radio();
     init_led_matrix();
     init_rtc();
 
@@ -23,7 +23,7 @@ void setup() {
 }
 
 void loop() {
-    loop_radio();
+    // loop_radio();
     loop_matrix();
     loop_laps_pulse();
 }
