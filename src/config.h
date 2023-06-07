@@ -15,7 +15,7 @@ https://forum.arduino.cc/t/p10-with-nrf24l01/570541/10
 #include <RF24.h>
 #include <Wire.h>
 #include <RTClib.h>
-#include "DMD2.h"
+#include "DMD.h"
 #include "droid_sans_24.h"
 
 // Constantes pines / pins definition
@@ -36,8 +36,7 @@ https://forum.arduino.cc/t/p10-with-nrf24l01/570541/10
 // Objeto para manejo de matriz mosaicos led P10 / Object for handling P10 modules matrix
 RF24 radio(NRF_CE_PIN, NRF_CSN_PIN);
 Bounce laps_pulse = Bounce();
-SoftDMD led_matrix(LED_MATRIX_COLS, LED_MATRIX_ROWS);
-DMD_TextBox led_chrono_box(led_matrix, 47, 5, 125, 29);
+DMD led_matrix(LED_MATRIX_COLS, LED_MATRIX_ROWS);
 RTC_DS3231 rtc;
 
 // Dirección de comunicación / Comm address

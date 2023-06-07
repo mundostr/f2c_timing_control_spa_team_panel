@@ -6,13 +6,11 @@ void rtc_interrupt_check() {
     interruptCount++;
 
     if (interruptCount % 819 == 0) {
-    // if (interruptCount % 3276 == 0) {
         ts++;
         update_display = true;
     }
     
     if (interruptCount == 8192) {
-    // if (interruptCount == 32768) {
         ss++;
         ts = -1;
         interruptCount = 0;
@@ -23,7 +21,7 @@ void rtc_interrupt_check() {
 }
 
 void update_fault_lights() {
-    /* static const int start_x_coord = 0;
+    static const int start_x_coord = 0;
     static const int end_x_coord = 127;
     int limit_x_coord;
     bool show_faults = true;
@@ -55,67 +53,21 @@ void update_fault_lights() {
         }
 
         default: {}
-    } */
+    }
 
-    // Limpieza fila inferior matriz (infracciones) / Cleanup of matrix bottom row (warnings)
-    // led_matrix.drawFilledBox(start_x_coord, 33, end_x_coord, 47, GRAPHICS_INVERSE);
-    // if (show_faults) { led_matrix.drawFilledBox(start_x_coord, 33, limit_x_coord, 47, GRAPHICS_NORMAL); }
+    led_matrix.drawFilledBox(start_x_coord, 33, end_x_coord, 47, GRAPHICS_INVERSE);
+    if (show_faults) { led_matrix.drawFilledBox(start_x_coord, 33, limit_x_coord, 47, GRAPHICS_NORMAL); }
 }
 
-/* byte getDigits(byte number) {
-    int digits = 0;
-    
-    if (number == 0) return 1;
-    
-    while (number != 0) {
-        number /= 10;
-        digits++;
-    }
-    
-    return digits;
-} */
-
-/* void update_two_digits(byte counter, char *laps_str) {
-    if (counter % 10 == 0) {
-        led_matrix.drawFilledBox(18, 5, 44, 29, GRAPHICS_INVERSE);
-        led_matrix.drawChar(18, 5, laps_str[1], GRAPHICS_NORMAL);
-        led_matrix.drawChar(31, 5, '0', GRAPHICS_NORMAL);
-    } else {
-        led_matrix.drawFilledBox(31, 5, 44, 29, GRAPHICS_INVERSE);
-        led_matrix.drawChar(31, 5, laps_str[2], GRAPHICS_NORMAL);
-    }
-} */
-
-/* void update_laps_in_display_alt() {
+void update_laps_in_display() {
     static char laps_string[4];
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
-
-    if (getDigits(laps_counter) == 1) {
-        led_matrix.drawFilledBox(31, 5, 44, 29, GRAPHICS_INVERSE);
-        led_matrix.drawChar(31, 5, laps_string[2], GRAPHICS_NORMAL);
-    } else if (getDigits(laps_counter) == 2) {
-        update_two_digits(laps_counter, laps_string);
-    } else {
-        if (laps_counter % 100 == 0) {
-            led_matrix.drawFilledBox(5, 5, 44, 29, GRAPHICS_INVERSE);
-            led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
-            led_matrix.drawChar(18, 5, '0', GRAPHICS_NORMAL);
-            led_matrix.drawChar(31, 5, '0', GRAPHICS_NORMAL);
-        } else {
-            update_two_digits(laps_counter, laps_string);
-        }
-    }
-} */
-
-void update_laps_in_display() {
-    // static char laps_string[4];
-    // snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
     
-    // for (int y = 5; y < 30; y++) { led_matrix.drawLine(5, y, 44, y, GRAPHICS_INVERSE); }
+    for (int y = 5; y < 30; y++) { led_matrix.drawLine(5, y, 44, y, GRAPHICS_INVERSE); }
     // led_matrix.drawFilledBox(5, 5, 44, 29, GRAPHICS_INVERSE);
-    // led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
-    // led_matrix.drawChar(18, 5, laps_string[1], GRAPHICS_NORMAL);
-    // led_matrix.drawChar(31, 5, laps_string[2], GRAPHICS_NORMAL);
+    led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
+    led_matrix.drawChar(18, 5, laps_string[1], GRAPHICS_NORMAL);
+    led_matrix.drawChar(31, 5, laps_string[2], GRAPHICS_NORMAL);
 }
 
 void verify_payload_data(char *data) {
@@ -210,17 +162,17 @@ void init_radio() {
 }
 
 void init_led_matrix() {
-    led_matrix.setBrightness(128);
+    led_matrix.clearScreen(true);
     led_matrix.selectFont(Droid_Sans_24);
-    led_matrix.begin();
-    
-    led_matrix.drawBox(0, 0, 127, 31, GRAPHICS_ON);
-    led_matrix.drawBox(1, 1, 126, 30, GRAPHICS_ON);
-    
-    led_matrix.drawLine(45, 0, 45, 31, GRAPHICS_ON);
-    led_matrix.drawLine(46, 0, 46, 31, GRAPHICS_ON);
 
-    led_chrono_box.print("0:00.0");
+    led_matrix.drawString(5, 5, "000", 3, GRAPHICS_NORMAL);
+    led_matrix.drawString(60, 5, "0:00.0", 6, GRAPHICS_NORMAL);
+
+    led_matrix.drawBox(0, 0, 127, 31, GRAPHICS_NORMAL);
+    led_matrix.drawBox(1, 1, 126, 30, GRAPHICS_NORMAL);
+    
+    led_matrix.drawLine(45, 0, 45, 31, GRAPHICS_NORMAL);
+    led_matrix.drawLine(46, 0, 46, 31, GRAPHICS_NORMAL);
 }
 
 void init_rtc() {
@@ -232,13 +184,13 @@ void init_rtc() {
         #endif
         for(;;);
     }
-    // rtc.writeSqwPinMode(DS3231_SquareWave8kHz);
-    rtc.enable32K();
+    rtc.writeSqwPinMode(DS3231_SquareWave8kHz);
+    // rtc.enable32K();
     
     pinMode(RTC_EXT_INT_PIN, INPUT_PULLUP);
 
     #ifdef DEBUG
-    Serial.println(F("RTC: OK 32K output enabled"));
+    Serial.println(F("RTC: OK 8K output enabled"));
     #endif
 }
 
@@ -261,17 +213,24 @@ void loop_radio() {
 
 void loop_matrix() {
     static char display_buffer[7];
+    static unsigned long timerDisplay = 0;
 
     if (update_display) {
         snprintf(display_buffer, sizeof(display_buffer), "%d:%02d.%d", mm, ss, ts);
-        // led_chrono_box.clear();
-        // led_chrono_box.print(display_buffer);
+        for (int y = 5; y < 30; y++) { led_matrix.drawLine(47, y, 125, y, GRAPHICS_INVERSE); }
+        // led_matrix.drawFilledBox(47, 5, 125, 29, GRAPHICS_INVERSE);
+        led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
 
         update_display = false;
             
         #ifdef DEBUG
         Serial.println(display_buffer);
         #endif
+    }
+
+    if (millis() - timerDisplay >= 5) {
+        led_matrix.scanDisplayBySPI();
+        timerDisplay = millis();
     }
 }
 
@@ -282,10 +241,6 @@ void loop_laps_pulse() {
         laps_counter++;
         update_laps_in_display();
 
-        // temporal para test
-        char *command = "SRS";
-        if (laps_counter == 1) { verify_payload_data(command); }
-        
         if (laps_counter == laps_limit) {
             race_started = false;
             detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
