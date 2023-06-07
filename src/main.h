@@ -63,8 +63,8 @@ void update_laps_in_display() {
     static char laps_string[4];
     snprintf(laps_string, sizeof(laps_string), "%03d", laps_counter);
     
-    for (int y = 5; y < 30; y++) { led_matrix.drawLine(5, y, 44, y, GRAPHICS_INVERSE); }
-    // led_matrix.drawFilledBox(5, 5, 44, 29, GRAPHICS_INVERSE);
+    // for (int y = 5; y < 30; y++) { led_matrix.drawLine(5, y, 44, y, GRAPHICS_INVERSE); }
+    led_matrix.drawFilledBox(5, 5, 44, 29, GRAPHICS_INVERSE);
     led_matrix.drawChar(5, 5, laps_string[0], GRAPHICS_NORMAL);
     led_matrix.drawChar(18, 5, laps_string[1], GRAPHICS_NORMAL);
     led_matrix.drawChar(31, 5, laps_string[2], GRAPHICS_NORMAL);
@@ -217,8 +217,8 @@ void loop_matrix() {
 
     if (update_display) {
         snprintf(display_buffer, sizeof(display_buffer), "%d:%02d.%d", mm, ss, ts);
-        for (int y = 5; y < 30; y++) { led_matrix.drawLine(47, y, 125, y, GRAPHICS_INVERSE); }
-        // led_matrix.drawFilledBox(47, 5, 125, 29, GRAPHICS_INVERSE);
+        // for (int y = 5; y < 30; y++) { led_matrix.drawLine(47, y, 125, y, GRAPHICS_INVERSE); }
+        led_matrix.drawFilledBox(47, 5, 125, 29, GRAPHICS_INVERSE);
         led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
 
         update_display = false;
