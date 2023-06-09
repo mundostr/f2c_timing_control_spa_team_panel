@@ -78,21 +78,21 @@ void verify_payload_data(char *data) {
     }
 
     switch (command) {
-        // RFP
+        // RFP (Red fault plus)
         case 0: {
             faults_counter < 4 ? faults_counter++ : faults_counter = 4;
             update_fault_lights();
             break;
         }
         
-        // RFM
+        // RFM (Red fault minus)
         case 1: {
             faults_counter > 0 ? faults_counter-- : faults_counter = 0;
             update_fault_lights();
             break;
         }
 
-        // SRS
+        // SRS (Start race signal)
         case 2: {
             race_started = true;
             update_display = true;
@@ -101,7 +101,7 @@ void verify_payload_data(char *data) {
             break;
         }
 
-        // RRS
+        // RRS (Reset race signal)
         case 3: {
             race_started = false;
             update_display = true;
@@ -111,8 +111,9 @@ void verify_payload_data(char *data) {
             break;
         }
 
-        // SES (pendiente)
+        // SES (Start engines signal)
         case 4: {
+            // Pending
             break;
         }
 
@@ -228,6 +229,7 @@ void loop_matrix() {
         #endif
     }
 
+    // Ver refresco dentro o fuera del update_display
     if (millis() - timerDisplay >= 5) {
         led_matrix.scanDisplayBySPI();
         timerDisplay = millis();
