@@ -123,12 +123,16 @@ void verify_payload_data(char *data) {
 
         // SES (Start engines signal)
         case 4: {
-            Serial.println("Muestra 1:30");
             warmup_started = true;
+            update_display = true;
             led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
             led_matrix.drawString(60, 5, "1:30", 6, GRAPHICS_NORMAL);
             laps_counter = 0, mm = 0, ss = 90, ts = 0, interruptCount = 0;
             attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_warmup_check, FALLING);
+
+            #ifdef DEBUG
+            Serial.println("Muestra 1:30");
+            #endif
 
             break;
         }
