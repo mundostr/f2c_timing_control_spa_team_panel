@@ -2,7 +2,7 @@
 
 #include "config.h"
 
-void rtc_interrupt_check() {
+void rtc_swatch_check() {
     interruptCount++;
 
     if (interruptCount % 819 == 0) {
@@ -17,6 +17,16 @@ void rtc_interrupt_check() {
 
         if (ss > 59) { ss = 0; mm++; }
         if (mm > 9) { mm = 0; }
+    }
+}
+
+void rtc_warmup_check() {
+    interruptCount++;
+
+    if (interruptCount == 8192) {
+        ss--;
+        interruptCount = 0;
+        update_display = true;
     }
 }
 
@@ -97,7 +107,7 @@ void verify_payload_data(char *data) {
             race_started = true;
             update_display = true;
             laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0;
-            attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_interrupt_check, FALLING);
+            attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_swatch_check, FALLING);
             break;
         }
 
@@ -113,10 +123,12 @@ void verify_payload_data(char *data) {
 
         // SES (Start engines signal)
         case 4: {
-            led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
-            led_matrix.drawString(6, 5, "1:30", 6, GRAPHICS_NORMAL);
+            Serial.println("Muestra 1:30");
             warmup_started = true;
-            warmup_timer = 0;
+            led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
+            led_matrix.drawString(60, 5, "1:30", 6, GRAPHICS_NORMAL);
+            laps_counter = 0, mm = 0, ss = 90, ts = 0, interruptCount = 0;
+            attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_warmup_check, FALLING);
 
             break;
         }
@@ -220,38 +232,52 @@ void loop_matrix() {
     static char display_buffer[7];
     static unsigned long display_timer = 0;
 
-    if (warmup_started && millis() - warmup_timer >= 1000) {
-        warmup_counter--;
-            
-        if (warmup_counter >= 60) {
-            snprintf(display_buffer, sizeof(display_buffer), "1:%02d", warmup_counter - 60);
+    if (warmup_started && update_display) {
+        if (ss >= 60) {
+            snprintf(display_buffer, sizeof(display_buffer), "1:%02d", ss - 60);
         } else {
-            snprintf(display_buffer, sizeof(display_buffer), "0:%02d", warmup_counter);
+            snprintf(display_buffer, sizeof(display_buffer), "0:%02d", ss);
         }
         led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
         led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
+        
+        #ifdef DEBUG
+        Serial.println(display_buffer);
+        #endif
 
-        if (warmup_counter == 0) {
+        if (ss == 0) {
             warmup_started = false;
             last30_started = true;
+            ss = 30, interruptCount = 0;
+
+            #ifdef DEBUG
+            Serial.println("Limpia warmup");
+            #endif
         }
 
-        warmup_timer = millis();
+        update_display = false;
     }
 
-    if (last30_started && millis() - warmup_timer >= 1000) {
-        last30_counter--;
-        
-        snprintf(display_buffer, sizeof(display_buffer), "0:%02d", last30_counter);
+    if (last30_started && update_display) {
+        snprintf(display_buffer, sizeof(display_buffer), "0:%02d", ss);
         led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
         led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
 
-        if (last30_counter == 5) {
+        #ifdef DEBUG
+        Serial.println(display_buffer);
+        #endif
+
+        if (ss == 5) {
             last30_started = false;
+            detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
             init_led_matrix();
+
+            #ifdef DEBUG
+            Serial.println("Limpia crono");
+            #endif
         }
 
-        warmup_timer = millis();
+        update_display = false;
     }
 
     if (race_started && update_display) {
