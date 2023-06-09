@@ -56,10 +56,14 @@ Payload payload;
 byte laps_limit = 100; // Límite para detención de crono / Limit to stop timing
 byte laps_counter = 0; // Contador de vueltas de carrera / Race laps counter
 byte faults_counter = 0; // Contador de infracciones / Warnings counter
+byte warmup_counter = 90;
+byte last30_counter = 30;
 
 // Flags para marcas de inicio warmup y carrera / Flags for warmup and race init marks
 bool race_started = false;
 bool warmup_started = false;
+bool last30_started = false;
+static unsigned long warmup_timer = 0;
 
 // Flags para interrupción control cronómetro / Flags for stopwatch control interrupt
 volatile bool update_display = false;

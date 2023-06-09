@@ -113,7 +113,11 @@ void verify_payload_data(char *data) {
 
         // SES (Start engines signal)
         case 4: {
-            // Pending
+            led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
+            led_matrix.drawString(6, 5, "1:30", 6, GRAPHICS_NORMAL);
+            warmup_started = true;
+            warmup_timer = 0;
+
             break;
         }
 
@@ -214,9 +218,43 @@ void loop_radio() {
 
 void loop_matrix() {
     static char display_buffer[7];
-    static unsigned long timerDisplay = 0;
+    static unsigned long display_timer = 0;
 
-    if (update_display) {
+    if (warmup_started && millis() - warmup_timer >= 1000) {
+        warmup_counter--;
+            
+        if (warmup_counter >= 60) {
+            snprintf(display_buffer, sizeof(display_buffer), "1:%02d", warmup_counter - 60);
+        } else {
+            snprintf(display_buffer, sizeof(display_buffer), "0:%02d", warmup_counter);
+        }
+        led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
+        led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
+
+        if (warmup_counter == 0) {
+            warmup_started = false;
+            last30_started = true;
+        }
+
+        warmup_timer = millis();
+    }
+
+    if (last30_started && millis() - warmup_timer >= 1000) {
+        last30_counter--;
+        
+        snprintf(display_buffer, sizeof(display_buffer), "0:%02d", last30_counter);
+        led_matrix.drawFilledBox(60, 5, 125, 29, GRAPHICS_INVERSE);
+        led_matrix.drawString(60, 5, display_buffer, sizeof(display_buffer) - 1, GRAPHICS_NORMAL);
+
+        if (last30_counter == 5) {
+            last30_started = false;
+            init_led_matrix();
+        }
+
+        warmup_timer = millis();
+    }
+
+    if (race_started && update_display) {
         snprintf(display_buffer, sizeof(display_buffer), "%d:%02d.%d", mm, ss, ts);
         // for (int y = 5; y < 30; y++) { led_matrix.drawLine(47, y, 125, y, GRAPHICS_INVERSE); }
         led_matrix.drawFilledBox(47, 5, 125, 29, GRAPHICS_INVERSE);
@@ -229,10 +267,9 @@ void loop_matrix() {
         #endif
     }
 
-    // Ver refresco dentro o fuera del update_display
-    if (millis() - timerDisplay >= 5) {
+    if (millis() - display_timer >= 5) {
         led_matrix.scanDisplayBySPI();
-        timerDisplay = millis();
+        display_timer = millis();
     }
 }
 
