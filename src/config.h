@@ -5,6 +5,9 @@ https://forum.arduino.cc/t/need-numeric-or-another-font-for-a-clock-in-dmd2-libr
 https://lygte-info.dk/project/PrecisionTime%20UK.html
 https://lastminuteengineers.com/ds3231-rtc-arduino-tutorial/#:~:text=The%20INT%2FSQW%20pin%20on,clock%20on%20the%2032K%20pin.
 https://forum.arduino.cc/t/p10-with-nrf24l01/570541/10
+https://drive.google.com/drive/folders/1-U5LojzlbU2sCFoRP0HKdWDOntVJDE-I
+
+Distribución de dígitos: 6+12+12+12+8+12+12+12+12+12+12+6
 */
 
 #pragma once
@@ -16,7 +19,8 @@ https://forum.arduino.cc/t/p10-with-nrf24l01/570541/10
 #include <Wire.h>
 #include <RTClib.h>
 #include "DMD.h"
-#include "droid_sans_24.h"
+// #include "droid_sans_24.h"
+#include "big_number.h"
 
 // Constantes pines / pins definition
 #define NRF_CE_PIN 15
@@ -25,12 +29,16 @@ https://forum.arduino.cc/t/p10-with-nrf24l01/570541/10
 #define RTC_EXT_INT_PIN 3
 
 // Constantes generales / general constants
-#define DEBUG // Si se define se habilita la consola serial / If defined, serial console is enabled
+// #define DEBUG // Si se define se habilita la consola serial / If defined, serial console is enabled
 #define SERIAL_MONITOR_BAUDS 115200
 #define RADIO_COMMAND_LENGTH 3
 #define NRF_CHANNEL 108
 #define LED_MATRIX_ROWS 3
 #define LED_MATRIX_COLS 4
+#define POSX_LAPS 5 // 5 - 6
+#define POSX_VBAR 45 // 45 - 56
+#define POSX_SWATCH 52 // 60
+#define CHAR_WIDTH 12
 
 // Objecto para control de radio y pulso vueltas / Object for radio control and laps pulse
 // Objeto para manejo de matriz mosaicos led P10 / Object for handling P10 modules matrix
@@ -43,7 +51,7 @@ RTC_DS3231 rtc;
 const byte RADIO_ADDRESS[6] = "00001";
 
 // Array de comandos / Commands array
-const char COMMANDS_ARRAY[7][4] = {"RFP", "RFM", "SRS", "RRS", "SES", "100", "200"};
+// const char COMMANDS_ARRAY[7][4] = { "RFP", "RFM", "SRS", "RRS", "SES", "100", "200" };
 
 // Payload para manejo de datos / Payload for data handling
 struct Payload {
@@ -66,3 +74,6 @@ bool last30_started = false;
 volatile bool update_display = false;
 volatile int mm = 0, ss = 0, ts = 0;
 volatile unsigned int interruptCount = 0;
+
+// Timer helper para refresco de display // Helper timer for display refresh
+unsigned long display_timer = 0;
