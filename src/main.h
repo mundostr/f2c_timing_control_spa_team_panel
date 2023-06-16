@@ -5,18 +5,17 @@
 void rtc_swatch_check() {
     interruptCount++;
     
-    if (interruptCount % 102 == 0) {
-    // if (interruptCount % 409 == 0) {
-    // if (interruptCount % 819 == 0) {
-    // if (interruptCount % 3276 == 0) {
+     if (interruptCount % 102 == 0) {
+     // if (interruptCount % 409 == 0) {
+     // if (interruptCount % 819 == 0) {
+     // if (interruptCount % 3276 == 0) {
         ts++;
         update_display = true;
     }
-    
-    if (interruptCount == 1024) {
-    // if (interruptCount == 4096) {
-    // if (interruptCount == 8192) {
-    // if (interruptCount == 32768) {
+      if (interruptCount == 1024) {
+      // if (interruptCount == 4096) {
+      // if (interruptCount == 8192) {
+      // if (interruptCount == 32768) {
         ss++;
         ts = -1;
         interruptCount = 0;
@@ -42,23 +41,7 @@ void rtc_warmup_check() {
 void update_fault_lights() {
     led_matrix.drawFilledBox(0, 33, 127, 47, GRAPHICS_INVERSE);
 
-    if (faults_counter == 1) {
-        led_matrix.drawFilledBox(1, 34, 30, 46, GRAPHICS_NORMAL);
-    } else if (faults_counter == 2) {
-        led_matrix.drawFilledBox(1, 34, 30, 46, GRAPHICS_NORMAL);
-        led_matrix.drawFilledBox(33, 34, 62, 46, GRAPHICS_NORMAL);
-    } else if (faults_counter == 3) {
-        led_matrix.drawFilledBox(1, 34, 30, 46, GRAPHICS_NORMAL);
-        led_matrix.drawFilledBox(33, 34, 62, 46, GRAPHICS_NORMAL);
-        led_matrix.drawFilledBox(65, 34, 94, 46, GRAPHICS_NORMAL);
-    } else {
-        led_matrix.drawFilledBox(1, 34, 30, 46, GRAPHICS_NORMAL);
-        led_matrix.drawFilledBox(33, 34, 62, 46, GRAPHICS_NORMAL);
-        led_matrix.drawFilledBox(65, 34, 94, 46, GRAPHICS_NORMAL);
-        led_matrix.drawFilledBox(97, 34, 126, 46, GRAPHICS_NORMAL);
-    }
-
-    /* switch (faults_counter) {
+    switch (faults_counter) {
         case 0: {
             break;
         }
@@ -90,16 +73,11 @@ void update_fault_lights() {
         }
 
         default: {}
-    } */
-
-    #ifdef DEBUG
-    Serial.print("Faltas: ");
-    Serial.println(faults_counter);
-    #endif
+    }
 }
 
 void update_laps_in_display() {
-    char laps_string[4];
+    static char laps_string[4];
     snprintf(laps_string, 4, "%03d", laps_counter);
     
     led_matrix.drawFilledBox(POSX_LAPS, 5, 44, 29, GRAPHICS_INVERSE);
@@ -110,8 +88,7 @@ void update_laps_in_display() {
 
 void init_led_matrix() {
     led_matrix.clearScreen(true);
-    // led_matrix.selectFont(Droid_Sans_24);
-    led_matrix.selectFont(BigNumber);
+    led_matrix.selectFont(Droid_Sans_24);
 
     led_matrix.drawString(POSX_LAPS, 5, "000", 3, GRAPHICS_NORMAL);
     led_matrix.drawString(POSX_SWATCH, 5, "0:00.0", 6, GRAPHICS_NORMAL);
@@ -124,65 +101,13 @@ void init_led_matrix() {
 }
 
 void verify_payload_data(char *data) {
-    // const char COMMANDS_ARRAY[7][4] = { "RFP", "RFM", "SRS", "RRS", "SES", "100", "200" };
+    unsigned int command = 99;
 
-    if (strcmp(data, "RFP") == 0) {
-        faults_counter < 4 ? faults_counter++ : faults_counter = 4;
-        update_fault_lights();
-    
-    } else if (strcmp(data, "RFM") == 0) {
-        faults_counter > 0 ? faults_counter-- : faults_counter = 0;
-        update_fault_lights();
-    
-    } else if (strcmp(data, "SRS") == 0) {
-        race_started = true;
-        update_display = true;
-        laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0, display_timer = 0;
-        attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_swatch_check, FALLING);
-    
-    } else if (strcmp(data, "RRS") == 0) {
-        warmup_started = false;
-        last30_started = false;
-        race_started = false;
-        update_display = true;
-        laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0, display_timer = 0;
-        detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
-        init_led_matrix();
-    
-    } else if (strcmp(data, "SES") == 0) {
-        warmup_started = true;
-        update_display = true;
-        led_matrix.drawFilledBox(POSX_SWATCH, 5, 125, 29, GRAPHICS_INVERSE);
-        led_matrix.drawString(POSX_SWATCH, 5, "1:30.0", 6, GRAPHICS_NORMAL);
-        laps_counter = 0, mm = 0, ss = 90, ts = 0, interruptCount = 0, display_timer = 0;
-        attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_warmup_check, FALLING);
-    
-    } else if (strcmp(data, "100") == 0) {
-        if (!warmup_started && !last30_started && !race_started) {
-            laps_limit = 100;
-                
-            #ifdef DEBUG
-            Serial.println("Se ha cambiado a 100 vueltas");
-            #endif
-        }
-    
-    } else if (strcmp(data, "200") == 0) {
-        if (!warmup_started && !last30_started && !race_started) {
-            laps_limit = 200;
-
-            #ifdef DEBUG
-            Serial.println("Se ha cambiado a 200 vueltas");
-            #endif
-        }
+    for (unsigned int c = 0; c < 7; c++) {
+        if (strcmp(data, COMMANDS_ARRAY[c]) == 0) { command = c; }
     }
 
-    // unsigned int command = 99;
-
-    /* for (unsigned int c = 0; c < 7; c++) {
-        if (strcmp(data, COMMANDS_ARRAY[c]) == 0) { command = c; }
-    } */
-
-    /* switch (command) {
+    switch (command) {
         // RFP (Red fault plus)
         case 0: {
             faults_counter < 4 ? faults_counter++ : faults_counter = 4;
@@ -201,7 +126,7 @@ void verify_payload_data(char *data) {
         case 2: {
             race_started = true;
             update_display = true;
-            laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0, display_timer = 0;
+            laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0;
             attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_swatch_check, FALLING);
             break;
         }
@@ -212,7 +137,7 @@ void verify_payload_data(char *data) {
             last30_started = false;
             race_started = false;
             update_display = true;
-            laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0, display_timer = 0;
+            laps_counter = 0, mm = 0, ss = 0, ts = 0, interruptCount = 0;
             detachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN));
             init_led_matrix();
             break;
@@ -224,42 +149,29 @@ void verify_payload_data(char *data) {
             update_display = true;
             led_matrix.drawFilledBox(POSX_SWATCH, 5, 125, 29, GRAPHICS_INVERSE);
             led_matrix.drawString(POSX_SWATCH, 5, "1:30.0", 6, GRAPHICS_NORMAL);
-            laps_counter = 0, mm = 0, ss = 90, ts = 0, interruptCount = 0, display_timer = 0;
+            laps_counter = 0, mm = 0, ss = 90, ts = 0, interruptCount = 0;
             attachInterrupt(digitalPinToInterrupt(RTC_EXT_INT_PIN), rtc_warmup_check, FALLING);
-
-            #ifdef DEBUG
-            Serial.println("Muestra 1:30");
-            #endif
-
             break;
         }
 
         // 100
         case 5: {
-            if (!warmup_started && !last30_started && !race_started) {
-                laps_limit = 100;
-                
-                #ifdef DEBUG
-                Serial.println("Se ha cambiado a 100 vueltas");
-                #endif
-            }
+            laps_limit = 100;
             break;
         }
 
         // 200
         case 6: {
-            if (!warmup_started && !last30_started && !race_started) {
-                laps_limit = 200;
-
-                #ifdef DEBUG
-                Serial.println("Se ha cambiado a 200 vueltas");
-                #endif
-            }
+            laps_limit = 200;
             break;
         }
         
         default: {}
-    } */
+    }
+    
+    #ifdef DEBUG
+    Serial.println(COMMANDS_ARRAY[command]);
+    #endif
 }
 
 
@@ -303,7 +215,7 @@ void init_rtc() {
     // rtc.enable32K();
     
     #ifdef DEBUG
-    Serial.println(F("RTC: SWQ 1K output enabled"));
+    Serial.println(F("RTC: SWQ output enabled"));
     #endif
 }
 
@@ -326,7 +238,8 @@ void loop_radio() {
 }
 
 void loop_matrix() {
-    char display_buffer[7];
+    static char display_buffer[7];
+    static unsigned long display_timer = 0;
 
     if (warmup_started && update_display) {
         if (ss >= 60) {
